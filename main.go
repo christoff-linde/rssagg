@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/christoff-linde/rssagg/internal/database"
 	"github.com/go-chi/chi"
@@ -20,6 +21,12 @@ type apiConfig struct {
 }
 
 func main() {
+	feed, err := urlToFeed("https://wagslane.dev/index.xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(feed)
+
 	godotenv.Load(".env")
 
 	port := os.Getenv("PORT")
@@ -32,7 +39,10 @@ func main() {
 	}
 
 	connection, err := sql.Open("postgres", databaseUrl)
-	apiCfg := apiConfig{DB: database.New(connection)}
+	db := database.New(connection)
+	apiCfg := apiConfig{DB: db}
+
+	go startScraping(db, 10, time.Minute)
 
 	router := chi.NewRouter()
 	router.Use(cors.Handler(cors.Options{
