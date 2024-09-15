@@ -1,0 +1,14 @@
+services:
+  db:
+    container_name: rssagg-db
+    image: postgres
+    environment:
+      POSTGRES_DB: "rssagg"
+      POSTGRES_PASSWORD: "admin"
+    ports:
+      - 5430:5432
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8088:8080
